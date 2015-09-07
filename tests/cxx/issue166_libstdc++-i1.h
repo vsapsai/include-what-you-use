@@ -11,6 +11,6 @@
 
 template<typename T>
 struct TypedefWrapper {
-	typedef T value;
-	typedef value& reference;
+  typedef T value;
+  typedef value& reference;
 };

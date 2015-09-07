@@ -16,10 +16,10 @@
 #include "tests/cxx/direct.h"
 
 void referenceUsage() {
-    // IWYU: IndirectClass needs a declaration
-    // IWYU: IndirectClass is...*indirect.h
-	Container<IndirectClass> c;
-	c.getContent().Method();
+  // IWYU: IndirectClass needs a declaration
+  // IWYU: IndirectClass is...*indirect.h
+  Container<IndirectClass> c;
+  c.getContent().Method();
 }
 
 /**** IWYU_SUMMARY
