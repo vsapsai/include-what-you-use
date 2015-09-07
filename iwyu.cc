@@ -1475,6 +1475,14 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
     return true;
   }
 
+  const Type* GetUnderlyingType(const Type* type) {
+    if (const TypedefType* typedef_type = DynCastFrom(type)) {
+      return GetUnderlyingType(
+          typedef_type->getDecl()->getUnderlyingType().getTypePtr());
+    }
+    return type;
+  }
+
   set<const Type*> GetCallerResponsibleTypesForTypedef(
       const TypedefDecl* decl) {
     set<const Type*> retval;
@@ -2082,6 +2090,7 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
     const Expr* base_expr = expr->getBase()->IgnoreParenImpCasts();
     const Type* base_type = GetTypeOf(base_expr);
     CHECK_(base_type && "Member's base does not have a type?");
+    base_type = GetUnderlyingType(base_type);
     const Type* deref_base_type      // For myvar->a, base-type will have a *
         = expr->isArrow() ? RemovePointerFromType(base_type) : base_type;
     if (CanIgnoreType(base_type) && CanIgnoreType(deref_base_type))
