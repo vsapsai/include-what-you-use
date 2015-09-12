@@ -1483,6 +1483,28 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
     return type;
   }
 
+  const Type* GetFirstNonTemplateTypedef(const TypedefType* typedef_type) {
+    const DeclContext* parent
+        = typedef_type->getDecl()->getLexicalDeclContext();
+    if (const ClassTemplateSpecializationDecl* template_parent
+        = DynCastFrom(parent)) {
+      return GetFirstNonTemplateTypedef(typedef_type, template_parent);
+    }
+    return typedef_type;
+  }
+
+  const Type* GetFirstNonTemplateTypedef(
+      const TypedefType* typedef_type, const RecordDecl* parent) {
+    const Type* underlying_type
+        = typedef_type->getDecl()->getUnderlyingType().getTypePtr();
+    if (const TypedefType* underlying_typedef = DynCastFrom(underlying_type)) {
+      if (underlying_typedef->getDecl()->getLexicalDeclContext() == parent) {
+        return GetFirstNonTemplateTypedef(underlying_typedef, parent);
+      }
+    }
+    return underlying_type;
+  }
+
   set<const Type*> GetCallerResponsibleTypesForTypedef(
       const TypedefDecl* decl) {
     set<const Type*> retval;
@@ -2090,11 +2112,13 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
     const Expr* base_expr = expr->getBase()->IgnoreParenImpCasts();
     const Type* base_type = GetTypeOf(base_expr);
     CHECK_(base_type && "Member's base does not have a type?");
-    base_type = GetUnderlyingType(base_type);
     const Type* deref_base_type      // For myvar->a, base-type will have a *
         = expr->isArrow() ? RemovePointerFromType(base_type) : base_type;
     if (CanIgnoreType(base_type) && CanIgnoreType(deref_base_type))
       return true;
+    if (const TypedefType* typedef_type = DynCastFrom(deref_base_type)) {
+      deref_base_type = GetFirstNonTemplateTypedef(typedef_type);
+    }
     // Technically, we should say the type is being used at the
     // location of base_expr.  That may be a different file than us in
     // cases like MACRO.b().  However, while one can imagine
