@@ -1,4 +1,4 @@
-//===--- issue166_naive_fix-d1.h - test input file for iwyu ---------------===//
+//===--- typedef_chain_no_follow-d1.h - test input file for iwyu ----------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,6 +7,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "tests/cxx/direct.h"
+#include "tests/cxx/typedef_chain_class.h"
 
-typedef IndirectClass IndirectClassTypedef;
+typedef TypedefChainClass TypedefChainTypedef;
