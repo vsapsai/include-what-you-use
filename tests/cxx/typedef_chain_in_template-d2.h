@@ -1,4 +1,4 @@
-//===--- issue166_libstdc++-d1.h - test input file for iwyu ---------------===//
+//===--- typedef_chain_in_template-d2.h - test input file for iwyu --------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,15 +7,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-// This header mimics std::vector in libstdc++.
-
-#include "tests/cxx/issue166_libstdc++-i1.h"
+// This header mimics std::vector in libc++.
 
 template<typename T>
-class Container {
-private:
+class ContainerAsLibcpp {
+ private:
   T content_;
-public:
-  typedef typename TypedefWrapper<T>::reference reference;
+ public:
+  typedef T value;
+  typedef value& reference;
   reference getContent() { return content_; }
 };

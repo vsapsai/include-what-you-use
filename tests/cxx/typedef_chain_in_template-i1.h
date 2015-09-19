@@ -1,4 +1,4 @@
-//===--- issue166_libstdc++-i1.h - test input file for iwyu ---------------===//
+//===--- typedef_chain_in_template-i1.h - test input file for iwyu --------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
