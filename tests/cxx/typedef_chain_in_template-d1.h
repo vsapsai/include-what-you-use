@@ -13,9 +13,10 @@
 
 template<typename T>
 class ContainerAsLibstdcpp {
- private:
-  T content_;
  public:
+  typedef T value_type;
   typedef typename TypedefWrapper<T>::reference reference;
   reference getContent() { return content_; }
+ private:
+  value_type content_;
 };

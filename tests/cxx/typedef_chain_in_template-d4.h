@@ -11,15 +11,15 @@
 
 template<typename T>
 class ContainerLongTypedefChain {
- private:
-  T content_;
  public:
-  typedef T value;
-  typedef value& reference;
+  typedef T value_type;
+  typedef value_type& reference;
   typedef reference& reference_reference;
   reference_reference getContent1() { return content_; }
 
   typedef reference reference2;
   typedef reference2 reference3;
   reference3 getContent2() { return content_; }
+ private:
+  value_type content_;
 };

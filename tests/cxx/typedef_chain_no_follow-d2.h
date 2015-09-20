@@ -13,9 +13,9 @@
 
 class NonContainer1 {
  public:
-  typedef TypedefChainClass value;
-  typedef value& reference;
+  typedef TypedefChainClass value_type;
+  typedef value_type& reference;
 
-  value tcc_;
+  value_type tcc_;
   reference getTypedefChainClass() { return tcc_; }
 };

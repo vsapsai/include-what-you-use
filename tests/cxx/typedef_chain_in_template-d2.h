@@ -11,10 +11,10 @@
 
 template<typename T>
 class ContainerAsLibcpp {
- private:
-  T content_;
  public:
-  typedef T value;
-  typedef value& reference;
+  typedef T value_type;
+  typedef value_type& reference;
   reference getContent() { return content_; }
+ private:
+  value_type content_;
 };
