@@ -1475,14 +1475,15 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
     return true;
   }
 
-  const Type* GetUnderlyingType(const Type* type) {
-    if (const TypedefType* typedef_type = DynCastFrom(type)) {
-      return GetUnderlyingType(
-          typedef_type->getDecl()->getUnderlyingType().getTypePtr());
-    }
-    return type;
-  }
-
+  // Returns the first type that is not a typedef in a template.  For example,
+  // for template
+  //
+  //   template<typename T> class Foo {
+  //     typedef T value_type;
+  //     typedef value_type& reference;
+  //   };
+  //
+  // for type 'reference' it will return type T with which Foo was instantiated.
   const Type* GetFirstNonTemplateTypedef(const TypedefType* typedef_type) {
     const DeclContext* parent
         = typedef_type->getDecl()->getLexicalDeclContext();
