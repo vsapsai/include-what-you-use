@@ -1,4 +1,4 @@
-//===--- using_aliased_symbol-declare.h - test input file for iwyu --------===//
+//===--- using_aliased_symbol-alias.h - test input file for iwyu ----------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
