@@ -1882,22 +1882,26 @@ size_t PrintableDiffs(const string& filename,
 }  // namespace internal
 
 void IwyuFileInfo::ResolvePendingAnalysis() {
-  // Resolve using declarations before continuing.  This handles the case
-  // where there's a using declaration in the file but no code is actually
-  // using it. If that happens, we might try to remove all of the headers with
-  // the decls that the using decl is referencing, which would result in a
-  // compilation error at best. A possible solution is to remove the using
-  // decl if it's not used, but that doesn't work for header files because a
-  // using decl in a header is an exported symbol, so we don't want to do that
-  // either. As a compromise, we arbitrarily add the first shadow decl to make
-  // sure everything still compiles instead of removing the using decl. A
-  // more thorough approach would be to scan the current list of includes that
+  // Resolve using declarations:  This handles the case where there's a using
+  // declaration in the file but no code is actually using it. If that
+  // happens, we might try to remove all of the headers with the decls that
+  // the using decl is referencing, which would result in a compilation error
+  // at best. A possible solution is to remove the using decl if it's not
+  // used, but that doesn't work for header files because a using decl in a
+  // header is an exported symbol, so we don't want to do that either. As a
+  // compromise, we arbitrarily add the first shadow decl to make sure
+  // everything still compiles instead of removing the using decl. A more
+  // thorough approach would be to scan the current list of includes that
   // already name this decl (like in the overloaded function case) and include
   // one of those so we don't include a file we don't actually need.
   for (map<const UsingDecl*, bool>::value_type using_decl_status
     : using_decl_referenced_) {
     if (!using_decl_status.second) {
       const UsingDecl* using_decl = using_decl_status.first;
+      // It should not be possible to get here with a using decl without any
+      // shadow decls because doing so would imply that the input code we're
+      // analyzing code doesn't compile.
+      CHECK_(using_decl->shadow_size() > 0);
       ReportForwardDeclareUse(using_decl->getUsingLoc(),
         using_decl->shadow_begin()->getTargetDecl(),
         /* in_cxx_method_body */ false,

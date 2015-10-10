@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 // Tests that when we include a file that contains a using decl, that we are not
-// forced to include that file even if the decl is not used.
+// forced to include that file if the decl is not used.
 
 #include "using_aliased_symbol-alias.h"
 

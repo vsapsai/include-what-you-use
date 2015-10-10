@@ -1579,7 +1579,6 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
   virtual void ReportDeclUseWithComment(SourceLocation used_loc,
                                         const NamedDecl* used_decl,
                                         const char* comment) {
-
     const NamedDecl* target_decl = used_decl;
 
     // Sometimes a shadow decl comes between us and the 'real' decl.
@@ -2583,10 +2582,9 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
   }
 
   void AddShadowDeclarations(const UsingDecl* using_decl) {
-    for (UsingDecl::shadow_iterator it = using_decl->shadow_begin();
-         it != using_decl->shadow_end(); ++it) {
-      visitor_state_->using_declarations.insert(make_pair(it->getTargetDecl(),
-          it->getUsingDecl()));
+    for (const UsingShadowDecl* shadow : using_decl->shadows()) {
+      visitor_state_->using_declarations.insert(
+          make_pair(shadow->getTargetDecl(), shadow->getUsingDecl()));
     }
   }
 
@@ -2602,7 +2600,7 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
   }
 
   const UsingDecl* GetUsingDeclarationOf(const NamedDecl* decl,
-                                         const DeclContext* using_context) {
+                                         const DeclContext* use_context) {
     // First, if we have a UsingShadowDecl, then we don't need to do anything
     // because we can just directly return the using decl from that.
     if (const UsingShadowDecl* shadow = DynCastFrom(decl))
@@ -2618,7 +2616,7 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
     vector<const UsingDecl*> using_decls
         = FindInMultiMap(visitor_state_->using_declarations, decl);
     for (Each<const UsingDecl*> it(&using_decls); !it.AtEnd(); ++it) {
-      if (!(*it)->getDeclContext()->Encloses(using_context))
+      if (!(*it)->getDeclContext()->Encloses(use_context))
         continue;
       if (GetFileEntry(decl) == GetFileEntry(*it) ||    // in same file, prefer
           retval == NULL) {        // not in same file, but better than nothing
@@ -3425,10 +3423,9 @@ class IwyuAstConsumer
     // entire AST is visited because it's only at that point that we know if
     // the symbol was actually used or not.
     // We perform that analysis here before CalculateAndReportIwyuViolations.
-    for (Each<const FileEntry*> file(files_to_report_iwyu_violations_for);
-         !file.AtEnd(); ++file) {
-      CHECK_(preprocessor_info().FileInfoFor(*file));
-      preprocessor_info().FileInfoFor(*file)->ResolvePendingAnalysis();
+    for (const FileEntry* file : *files_to_report_iwyu_violations_for) {
+      CHECK_(preprocessor_info().FileInfoFor(file));
+      preprocessor_info().FileInfoFor(file)->ResolvePendingAnalysis();
     }
 
     // We have to calculate the .h files before the .cc file, since

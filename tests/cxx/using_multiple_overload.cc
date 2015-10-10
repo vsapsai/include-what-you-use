@@ -9,7 +9,7 @@
 
 // Tests that when we use multiple function overloads through a using decl, 
 // that we correctly include all of the necessary files for the overload and
-// don't accidently remove files greedily.
+// don't accidentally remove files greedily.
 
 #include <vector>
 #include <list>
