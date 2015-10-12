@@ -3651,7 +3651,14 @@ class IwyuAstConsumer
   // Called whenever a variable, function, enum, etc is used.
   bool VisitDeclRefExpr(clang::DeclRefExpr* expr) {
     if (CanIgnoreCurrentASTNode())  return true;
-    ReportDeclUse(CurrentLoc(), expr->getFoundDecl());
+    // Special case for UsingShadowDecl to track UsingDecls correctly. The
+    // actual decl will be reported by obtaining it from the UsingShadowDecl
+    // once we've tracked the UsingDecl use.
+    if (const UsingShadowDecl* found_decl = DynCastFrom(expr->getFoundDecl())) {
+      ReportDeclUse(CurrentLoc(), found_decl);
+    } else {
+      ReportDeclUse(CurrentLoc(), expr->getDecl());
+    }
     return Base::VisitDeclRefExpr(expr);
   }
 
