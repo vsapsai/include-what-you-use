@@ -477,6 +477,7 @@ string OneIncludeOrForwardDeclareLine::LineNumberString() const {
   return buf;
 }
 
+
 IwyuFileInfo::IwyuFileInfo(const clang::FileEntry* this_file,
                            const IwyuPreprocessorInfo* preprocessor_info,
                            const string& quoted_include_name)
