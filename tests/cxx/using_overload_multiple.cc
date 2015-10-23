@@ -18,7 +18,7 @@ void use_overload() {
   int a = 1;
   int b = 2;
   float c = 1.f;
-  float d = 1.f;
+  float d = 2.f;
   using ns::add;
   add(a, b);
   add(c, d);
