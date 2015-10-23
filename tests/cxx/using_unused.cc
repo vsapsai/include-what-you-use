@@ -11,8 +11,8 @@
 // need to include the original thing we're referencing, despite the fact that
 // it's not actually used.
 
-#include <vector>
-using std::vector;
+#include "using_unused-declare.h"
+using ns::symbol;
 
 /**** IWYU_SUMMARY
 
