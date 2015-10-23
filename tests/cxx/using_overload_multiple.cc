@@ -1,4 +1,4 @@
-//===--- using_multiple_overload.cc - test input file for iwyu ------------===//
+//===--- using_overload_multiple.cc - test input file for iwyu ------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -11,21 +11,21 @@
 // that we correctly include all of the necessary files for the overload and
 // don't accidentally remove files greedily.
 
-#include <vector>
-#include <list>
+#include "using_overload-float.h"
+#include "using_overload-int.h"
 
 void use_overload() {  
-  std::vector<int> a(10);
-  std::vector<int> b(11);
-  std::list<float> c;
-  std::list<float> d;
-  using std::swap;
-  swap(a, b);
-  swap(c, d);
+  int a = 1;
+  int b = 2;
+  float c = 1.f;
+  float d = 1.f;
+  using ns::add;
+  add(a, b);
+  add(c, d);
 }
 
 /**** IWYU_SUMMARY
 
-(tests/cxx/using_multiple_overload.cc has correct #includes/fwd-decls)
+(tests/cxx/using_overload_multiple.cc has correct #includes/fwd-decls)
 
 ***** IWYU_SUMMARY */

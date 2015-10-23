@@ -1,4 +1,4 @@
-//===--- using_single_overload.cc - test input file for iwyu --------------===//
+//===--- using_overload_single.cc - test input file for iwyu --------------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -12,24 +12,24 @@
 // actually used and not the entire overload set the the using decl
 // represents.
 
-#include <vector>
-#include <list>
+#include "using_overload-float.h"
+#include "using_overload-int.h"
 
 void use_overload() {  
-  std::vector<int> a(10);
-  std::vector<int> b(11);
-  using std::swap;
-  swap(a, b);
+  int a = 1;
+  int b = 2;
+  using ns::add;
+  add(a, b);
 }
 
 /**** IWYU_SUMMARY
 
-tests/cxx/using_single_overload.cc should add these lines:
+tests/cxx/using_overload_single.cc should add these lines:
 
-tests/cxx/using_single_overload.cc should remove these lines:
-- #include <list>  // lines XX-XX
+tests/cxx/using_overload_single.cc should remove these lines:
+- #include "using_overload-float.h"  // lines XX-XX
 
-The full include-list for tests/cxx/using_single_overload.cc:
-#include <vector>  // for swap, vector
+The full include-list for tests/cxx/using_overload_single.cc:
+#include "using_overload-int.h"  // for add
 
 ***** IWYU_SUMMARY */
