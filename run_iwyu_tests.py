@@ -45,7 +45,7 @@ class OneIwyuTest(unittest.TestCase):
   def CheckAlsoExtension(self, extension):
     """Return a suitable iwyu flag for checking files with the given extension.
     """
-    return '--check_also="%s"' % posixpath.join(self.rootdir, '*' + extension)
+    return '--check_also=%s' % posixpath.join(self.rootdir, '*' + extension)
 
   def MappingFile(self, filename):
     """Return a suitable iwyu flag for adding the given mapping file."""
@@ -53,7 +53,7 @@ class OneIwyuTest(unittest.TestCase):
 
   def Include(self, filename):
     """Return a -include switch for clang to force include of file."""
-    return '-include %s' % posixpath.join(self.rootdir, filename)
+    return ['-include', posixpath.join(self.rootdir, filename)]
 
   def setUp(self):
     # Iwyu flags for specific tests.
@@ -83,10 +83,10 @@ class OneIwyuTest(unittest.TestCase):
       'prefix_header_includes_remove.cc': ['--prefix_header_includes=remove'],
       'prefix_header_operator_new.cc': ['--prefix_header_includes=remove'],
     }
-    prefix_headers = [self.Include('prefix_header_includes-d1.h'),
-                      self.Include('prefix_header_includes-d2.h'),
-                      self.Include('prefix_header_includes-d3.h'),
-                      self.Include('prefix_header_includes-d4.h')]
+    prefix_headers = (self.Include('prefix_header_includes-d1.h') +
+                      self.Include('prefix_header_includes-d2.h') +
+                      self.Include('prefix_header_includes-d3.h') +
+                      self.Include('prefix_header_includes-d4.h'))
     clang_flags_map = {
       'alias_template.cc': ['-std=c++11'],
       'auto_type_within_template.cc': ['-std=c++11'],
@@ -98,8 +98,8 @@ class OneIwyuTest(unittest.TestCase):
       'lambda_fwd_decl.cc': ['-std=c++11'],
       'lateparsed_template.cc': ['-fdelayed-template-parsing'],
       'ms_inline_asm.cc': ['-fms-extensions'],
-      'prefix_header_attribution.cc': [
-          self.Include('prefix_header_attribution-d1.h')],
+      'prefix_header_attribution.cc':
+          self.Include('prefix_header_attribution-d1.h'),
       'prefix_header_includes_add.cc': prefix_headers,
       'prefix_header_includes_keep.cc': prefix_headers,
       'prefix_header_includes_remove.cc': prefix_headers,

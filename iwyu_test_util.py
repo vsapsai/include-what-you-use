@@ -111,7 +111,7 @@ def _GetIwyuPath():
 
 def _GetCommandOutput(command):
   p = subprocess.Popen(command,
-                       shell=True,
+                       shell=False,
                        stdout=subprocess.PIPE,
                        stderr=subprocess.STDOUT)
   stdout, _ = p.communicate()
@@ -403,7 +403,7 @@ def TestIwyuOnRelativeFile(test_case, cc_file, cpp_files_to_check,
   """
   iwyu_flags = iwyu_flags or []  # Make sure iwyu_flags is a list.
   clang_flags = clang_flags or []  # Make sure clang_flags is a list.
-  clang_flags = ['-I .'] + clang_flags  # Default header search path for tests.
+  clang_flags = ['-I', '.'] + clang_flags  # Default header search path for tests.
 
   # Require verbose level 3 so that we can verify the individual diagnostics.
   # We allow the level to be overriden by the IWYU_VERBOSE environment
@@ -412,19 +412,21 @@ def TestIwyuOnRelativeFile(test_case, cc_file, cpp_files_to_check,
   iwyu_flags = ['--verbose=%s' % os.getenv('IWYU_VERBOSE', '3')] + iwyu_flags
 
   # clang reads iwyu flags after the -Xiwyu clang flag: '-Xiwyu --verbose=6'
-  iwyu_flags = ['-Xiwyu ' + flag for flag in iwyu_flags]
+  prefixed_iwyu_flags = []
+  for flag in iwyu_flags:
+    prefixed_iwyu_flags.append('-Xiwyu')
+    prefixed_iwyu_flags.append(flag)
 
   # TODO(csilvers): verify that has exit-status 0.
-  cmd = '%s %s %s %s' % (
-      _GetIwyuPath(), ' '.join(iwyu_flags), ' '.join(clang_flags), cc_file)
+  cmd = [_GetIwyuPath()] + prefixed_iwyu_flags + clang_flags + [cc_file]
   if verbose:
     print('>>> Running %s' % cmd)
   output = _GetCommandOutput(cmd)
   print(''.join(output))
   sys.stdout.flush()      # don't commingle this output with the failure output
 
-  expected_diagnostics = _GetCommandOutput('grep -n -H "^ *// *IWYU" %s' %
-                                           (' '.join(cpp_files_to_check)))
+  expected_diagnostics = _GetCommandOutput(['grep', '-n', '-H', '^ *// *IWYU'] +
+                                           cpp_files_to_check)
   failures = _CompareExpectedAndActualDiagnostics(
       _GetExpectedDiagnosticRegexes(expected_diagnostics),
       _GetActualDiagnostics(output))
