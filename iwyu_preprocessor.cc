@@ -772,11 +772,24 @@ void IwyuPreprocessorInfo::ReportMacroUse(const string& name,
                                           SourceLocation dfn_location) {
   const FileEntry* used_in = GetFileEntry(usage_location);
 
-  if (!ShouldReportIWYUViolationsFor(used_in))
-    return;             // ignore symbols used outside foo.{h,cc}
   // Don't report macro uses that aren't actually in a file somewhere.
   if (!dfn_location.isValid() || GetFilePath(dfn_location) == "<built-in>")
     return;
+  if (!ShouldReportIWYUViolationsFor(used_in)) {
+    const FileEntry* defined_in = GetFileEntry(dfn_location);
+    const SourceLocation include_loc = GlobalSourceManager()->getIncludeLoc(
+        GlobalSourceManager()->getFileID(usage_location));
+    const FileEntry* use_includer = GetFileEntry(include_loc);
+    if (defined_in == use_includer) {
+      string quoted_private_include = "\"" + GetFilePath(usage_location) + "\"";
+      string quoted_public_include = "\"" + GetFilePath(dfn_location) + "\"";
+      MutableGlobalIncludePicker()->AddMapping(quoted_private_include,
+                                               quoted_public_include);
+      MutableGlobalIncludePicker()->MarkIncludeAsPrivate(
+          quoted_private_include);
+    }
+    return;             // ignore symbols used outside foo.{h,cc}
+  }
 
   // TODO(csilvers): this isn't really a symbol use -- it may be ok
   // that the symbol isn't defined.  For instance:
