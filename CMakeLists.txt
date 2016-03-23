@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
+if( POLICY CMP0048 )
+  # Silence CMP0048 warning about missing project VERSION.
+  cmake_policy(SET CMP0048 NEW)
+endif()
+
 project(include-what-you-use)
 
 if( CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR )
@@ -65,11 +70,14 @@ endif()
 
 # Pick up Git revision so we can report it in version information.
 include(FindGit)
-if( GIT_FOUND )
+if( GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/.git" )
   execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT_VARIABLE IWYU_GIT_REV
     OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
+  message(STATUS "Warning: IWYU Git version info not found, DO NOT release "
+                 "from this build tree!")
 endif()
 add_definitions(-DIWYU_GIT_REV="${IWYU_GIT_REV}")
 
@@ -144,6 +152,7 @@ target_link_libraries(include-what-you-use
   LLVMMCDisassembler # MC, Support
   LLVMMCParser # MC, Support
   LLVMMC # Object, Support
+  LLVMProfileData # Core, Support, Object
   LLVMObject # BitReader, Core, Support
   LLVMBitReader # Core, Support
   LLVMCore # Support

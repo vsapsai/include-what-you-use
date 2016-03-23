@@ -6,7 +6,7 @@
 // License. See LICENSE.TXT for details.
 //
 //===----------------------------------------------------------------------===//
-
+#include "tests/cxx/indirect.h"
 #include "tests/cxx/macro_location-d2.h"
 #include "tests/cxx/macro_location-d3.h"
 
@@ -23,20 +23,35 @@ NEW_CLASS(Bar);
 USE_CLASS(HClass);
 // This shouldn't cause macro_location-d1.h to need to include us for HClass.
 CREATE_VAR(HClass);
+// This should force us to #include a definition of IndirectClass, because it's
+// forward-declared by DECLARE_INDIRECT's file.
+DECLARE_INDIRECT(global_indirect);
 
+// Macro-concatenated locations end up in <scratch space>, check that they're
+// properly attributed to expansion.
+#define CONCAT(a, b) a##b
+
+// IWYU: ConcatFwdDeclClass needs a declaration
+CONCAT(Concat, FwdDeclClass) *global_concat_ptr;
+
+// IWYU: ConcatClass is...*macro_location-i4.h
+CONCAT(Concat, Class) global_concat;
 
 /**** IWYU_SUMMARY
 
 tests/cxx/macro_location.h should add these lines:
 #include "tests/cxx/macro_location-i3.h"
+#include "tests/cxx/macro_location-i4.h"
 
 tests/cxx/macro_location.h should remove these lines:
 - #include "tests/cxx/macro_location-d3.h"  // lines XX-XX
 - class Foo;  // lines XX-XX
 
 The full include-list for tests/cxx/macro_location.h:
-#include "tests/cxx/macro_location-d2.h"  // for ARRAYSIZE, CREATE_VAR, NEW_CLASS, USE_CLASS
+#include "tests/cxx/indirect.h"  // for IndirectClass
+#include "tests/cxx/macro_location-d2.h"  // for ARRAYSIZE, CREATE_VAR, DECLARE_INDIRECT, NEW_CLASS, USE_CLASS
 #include "tests/cxx/macro_location-i3.h"  // for Foo
+#include "tests/cxx/macro_location-i4.h"  // for ConcatClass, ConcatFwdDeclClass (ptr only)
 
 
 ***** IWYU_SUMMARY */

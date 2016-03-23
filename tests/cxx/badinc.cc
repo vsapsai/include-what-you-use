@@ -73,8 +73,6 @@
 #include <algorithm>  // try #including the same file twice
 #include <algorithm>  // ...and then 3 times
 
-#define CONCAT(a, b)  a##b
-
 // This should given an IWYU error even though MACRO_CALLING_I1_MACRO
 // is never actually called.
 // IWYU: MACRO_CALLING_I6_FUNCTION is...*badinc-i1.h
@@ -1066,7 +1064,7 @@ class CC_TemplateClass {
   typedef I1_TemplateClass<A> i1_typedef;
 
   // Let's throw in per-class operator new/delete.
-  // IWYU: size_t is...*((<stddef.h>)|(stdio.h)|(stdlib.h)|(string.h)|(time.h)|(wchar.h))
+  // IWYU: size_t is...*((<stddef.h>)|(stdio.h)|(string.h)|(time.h)|(wchar.h))
   void* operator new(size_t size) {
     B b;
     (void)b;
@@ -1448,11 +1446,6 @@ int main() {
   MACRO_CALLING_I6_FUNCTION;
   // IWYU: kI1ConstInt is...*badinc-i1.h
   (void)(kI1ConstInt);
-  // IWYU: kI1ConstInt is...*badinc-i1.h
-  (void)(CONCAT(kI1C, onstInt));
-  // IWYU: I1_Class needs a declaration
-  CONCAT(I1_, Class) *i1_concat_class_ptr;   // also test something fwd-decl
-  (void)(i1_concat_class_ptr);
 
   Cc_string().length();
 
@@ -1944,8 +1937,7 @@ int main() {
   int i2_macro_var = kI1ConstInt;
 #endif
 
-  // IWYU: rand is...*<stdlib.h>
-  return rand();           // use a function from stdlib.h
+  return 0;
 }
 
 // TODO(csilvers): the delete of <locale> should be line 56, not 35
@@ -1961,7 +1953,6 @@ tests/cxx/badinc.cc should add these lines:
 #include <ctype.h>
 #include <stdarg.h>
 #include <stddef.h>
-#include <stdlib.h>
 #include <list>
 #include <new>
 #include "tests/cxx/badinc-i1.h"
@@ -1993,7 +1984,6 @@ The full include-list for tests/cxx/badinc.cc:
 #include <setjmp.h>
 #include <stdarg.h>  // for va_list
 #include <stddef.h>  // for offsetof
-#include <stdlib.h>  // for rand
 #include <algorithm>  // for find
 #include <fstream>  // for fstream
 #include <list>  // for list

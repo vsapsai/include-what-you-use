@@ -31,6 +31,7 @@ using clang::ConditionalOperator;
 using clang::FunctionDecl;
 using clang::MemberExpr;
 using clang::SourceLocation;
+using clang::UnaryOperator;
 using clang::UnresolvedMemberExpr;
 
 
@@ -142,6 +143,10 @@ SourceLocation GetLocation(const clang::Stmt* stmt) {
   } else if (const ConditionalOperator* conditional_op =
              DynCastFrom(stmt)) {
     return conditional_op->getQuestionLoc();
+  } else if (const UnaryOperator* unary_op = DynCastFrom(stmt)) {
+    // Drill through unary operators and parentheses, to get at the underlying
+    // DeclRefExpr or whatever, e.g. '*(x)' should give the location of 'x'
+    stmt = unary_op->getSubExpr()->IgnoreParenImpCasts();
   }
 
   return stmt->getLocStart();
@@ -160,6 +165,10 @@ SourceLocation GetLocation(const clang::NestedNameSpecifierLoc* nnsloc) {
 SourceLocation GetLocation(const clang::TemplateArgumentLoc* argloc) {
   if (argloc == NULL)  return SourceLocation();
   return argloc->getLocation();
+}
+
+bool IsInScratchSpace(SourceLocation loc) {
+  return StartsWith(PrintableLoc(GetSpellingLoc(loc)), "<scratch space>");
 }
 
 }  // namespace include_what_you_use
