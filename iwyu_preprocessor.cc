@@ -775,12 +775,31 @@ void IwyuPreprocessorInfo::ReportMacroUse(const string& name,
   // Don't report macro uses that aren't actually in a file somewhere.
   if (!dfn_location.isValid() || GetFilePath(dfn_location) == "<built-in>")
     return;
-  if (!ShouldReportIWYUViolationsFor(used_in)) {
-    const FileEntry* defined_in = GetFileEntry(dfn_location);
-    const SourceLocation include_loc = GlobalSourceManager()->getIncludeLoc(
-        GlobalSourceManager()->getFileID(usage_location));
-    const FileEntry* use_includer = GetFileEntry(include_loc);
-    if (defined_in == use_includer) {
+  if (ShouldReportIWYUViolationsFor(used_in)) {
+    // ignore symbols used outside foo.{h,cc}
+
+    // TODO(csilvers): this isn't really a symbol use -- it may be ok
+    // that the symbol isn't defined.  For instance:
+    //    foo.h: #define FOO
+    //    bar.h: #ifdef FOO ... #else ... #endif
+    //    baz.cc: #include "foo.h"
+    //            #include "bar.h"
+    //    bang.cc: #include "bar.h"
+    // We don't want to say that bar.h 'uses' FOO, and thus needs to
+    // #include foo.h -- adding that #include could break bang.cc.
+    // I think the solution is to have a 'soft' use -- don't remove it
+    // if it's there, but don't add it if it's not.  Or something.
+    GetFromFileInfoMap(used_in)->ReportMacroUse(usage_location, dfn_location,
+                                                name);
+  }
+  const FileEntry* defined_in = GetFileEntry(dfn_location);
+  const SourceLocation include_loc = GlobalSourceManager()->getIncludeLoc(
+      GlobalSourceManager()->getFileID(usage_location));
+  const FileEntry* use_includer = GetFileEntry(include_loc);
+  if (defined_in == use_includer) {
+    if (ShouldReportIWYUViolationsFor(defined_in)) {
+      GetFromFileInfoMap(use_includer)->ReportIncludedFileMacroUse(used_in);
+    } else {
       string quoted_private_include = "\"" + GetFilePath(usage_location) + "\"";
       string quoted_public_include = "\"" + GetFilePath(dfn_location) + "\"";
       MutableGlobalIncludePicker()->AddMapping(quoted_private_include,
@@ -788,22 +807,7 @@ void IwyuPreprocessorInfo::ReportMacroUse(const string& name,
       MutableGlobalIncludePicker()->MarkIncludeAsPrivate(
           quoted_private_include);
     }
-    return;             // ignore symbols used outside foo.{h,cc}
   }
-
-  // TODO(csilvers): this isn't really a symbol use -- it may be ok
-  // that the symbol isn't defined.  For instance:
-  //    foo.h: #define FOO
-  //    bar.h: #ifdef FOO ... #else ... #endif
-  //    baz.cc: #include "foo.h"
-  //            #include "bar.h"
-  //    bang.cc: #include "bar.h"
-  // We don't want to say that bar.h 'uses' FOO, and thus needs to
-  // #include foo.h -- adding that #include could break bang.cc.
-  // I think the solution is to have a 'soft' use -- don't remove it
-  // if it's there, but don't add it if it's not.  Or something.
-  GetFromFileInfoMap(used_in)->ReportMacroUse(usage_location, dfn_location,
-                                              name);
 }
 
 // As above, but get the definition location from macros_definition_loc_.
