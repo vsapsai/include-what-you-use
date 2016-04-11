@@ -346,7 +346,8 @@ class IwyuFileInfo {
   set<const clang::FileEntry*> direct_includes_as_fileentries_;
   set<const clang::NamedDecl*> direct_forward_declares_;
 
-  // Holds any files included with the "IWYU pragma: keep" comment. And 1 other case.
+  // Holds files forced to be kept.  For example, files included with the
+  // "IWYU pragma: keep" comment and x-macros.
   set<const clang::FileEntry*> kept_includes_;
 
   // What we will recommend the #includes to be.

@@ -796,16 +796,24 @@ void IwyuPreprocessorInfo::ReportMacroUse(const string& name,
   const SourceLocation include_loc = GlobalSourceManager()->getIncludeLoc(
       GlobalSourceManager()->getFileID(usage_location));
   const FileEntry* use_includer = GetFileEntry(include_loc);
-  if (defined_in == use_includer) {
+  bool is_macro_defined_by_includer = (defined_in == use_includer);
+  if (is_macro_defined_by_includer) {
     if (ShouldReportIWYUViolationsFor(defined_in)) {
       GetFromFileInfoMap(use_includer)->ReportIncludedFileMacroUse(used_in);
+      ERRSYM(defined_in) << "Keep #include " << used_in->getName()
+                         << " in " << defined_in->getName()
+                         << " because macro " << name
+                         << " is defined by includer.\n";
     } else {
-      string quoted_private_include = "\"" + GetFilePath(usage_location) + "\"";
-      string quoted_public_include = "\"" + GetFilePath(dfn_location) + "\"";
-      MutableGlobalIncludePicker()->AddMapping(quoted_private_include,
-                                               quoted_public_include);
-      MutableGlobalIncludePicker()->MarkIncludeAsPrivate(
-          quoted_private_include);
+      string private_include = ConvertToQuotedInclude(
+          GetFilePath(usage_location));
+      string public_include = ConvertToQuotedInclude(GetFilePath(dfn_location));
+      MutableGlobalIncludePicker()->AddMapping(private_include, public_include);
+      MutableGlobalIncludePicker()->MarkIncludeAsPrivate(private_include);
+      ERRSYM(defined_in) << "Mark " << public_include
+                         << " as public header for " << private_include
+                         << " because macro " << name
+                         << " is defined by includer.\n";
     }
   }
 }
