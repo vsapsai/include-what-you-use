@@ -1747,68 +1747,6 @@ int main() {
   delete i2_deleted_ptr;
   delete i2_deleted_ptr;  // make sure each delete doesn't eat up a star
 
-  // Make sure we don't claim set::iterator is defined in map.
-  // IWYU: std::set is...*<set>
-  std::set<int> localset;
-  // IWYU: std::set is...*<set>
-  // IWYU: std::set<.*>::iterator is...*<set>
-  std::set<int>::iterator it_set = localset.begin();
-
-  // Lots of weird stuff can happen with iterators, especially regarding const.
-  // IWYU: std::vector is...*<vector>
-  std::vector<float> float_vector;
-  // IWYU: std::vector is...*<vector>
-  // IWYU: std::vector<.*>::const_iterator is...*<vector>
-  std::vector<float>::const_iterator float_it = float_vector.begin();
-  // IWYU: std::vector is...*<vector>
-  // IWYU: std::vector<.*>::const_iterator is...*<vector>
-  const std::vector<float>::const_iterator float_constit = float_vector.begin();
-  // IWYU: std::vector is...*<vector>
-  // IWYU: std::vector<.*>::const_iterator is...*<vector>
-  (void)(float_it == float_constit);
-  // IWYU: std::vector is...*<vector>
-  // IWYU: std::vector<.*>::const_iterator is...*<vector>
-  (void)(float_constit == float_it);
-  // IWYU: std::vector is...*<vector>
-  // IWYU: std::vector<.*>::const_iterator is...*<vector>
-  std::vector<float>::const_iterator float_forit;
-  // IWYU: std::vector is...*<vector>
-  // IWYU: std::vector<.*>::const_iterator is...*<vector>
-  for (float_forit = float_vector.begin(); ;) ;
-  // IWYU: std::vector is...*<vector>
-  // IWYU: std::vector<.*>::const_iterator is...*<vector>
-  for (std::vector<float>::const_iterator it = float_vector.begin(); ;) ;
-  // IWYU: std::vector is...*<vector>
-  // IWYU: std::vector<.*>::const_iterator is...*<vector>
-  for (const std::vector<float>::const_iterator it = float_vector.begin(); ;) ;
-  // We special-case vector<>::iterator.  Make sure it holds for
-  // reverse_iterator too.
-  // IWYU: std::vector is...*<vector>
-  // IWYU: std::vector<.*>::reverse_iterator is...*<vector>
-  for (std::vector<float>::reverse_iterator
-           // IWYU: std::vector is...*<vector>
-           float_reverse_it = float_vector.rbegin();
-       // IWYU: std::vector is...*<vector>
-       // IWYU: std::vector<.*>::reverse_iterator is...*<vector>
-       float_reverse_it != float_vector.rbegin();
-       // IWYU: std::vector is...*<vector>
-       // IWYU: std::vector<.*>::reverse_iterator is...*<vector>
-       ++float_reverse_it) ;
-  // IWYU: std::vector is...*<vector>
-  // IWYU: std::vector<.*>::const_reverse_iterator is...*<vector>
-  for (std::vector<float>::const_reverse_iterator
-           // We need const_reverse_iterator here because of the
-           // conversion from reverse_iterator (from rbegin()).
-           // IWYU: std::vector<.*>::const_reverse_iterator is...*<vector>
-           // IWYU: std::vector is...*<vector>
-           float_const_reverse_it = float_vector.rbegin();
-       // IWYU: std::vector is...*<vector>
-       // IWYU: std::vector<.*>::const_reverse_iterator is...*<vector>
-       float_const_reverse_it != float_vector.rend();
-       // IWYU: std::vector is...*<vector>
-       // IWYU: std::vector<.*>::const_reverse_iterator is...*<vector>
-       ++float_const_reverse_it) ;
-
   // Also test while and if initializers.
   // IWYU: I1_Class needs a declaration
   while (I1_Class* i = NULL) {
