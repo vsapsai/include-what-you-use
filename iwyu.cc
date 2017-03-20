@@ -246,6 +246,34 @@ bool CanIgnoreLocation(SourceLocation loc) {
           !ShouldReportIWYUViolationsFor(file_entry_after_macro_expansion));
 }
 
+const Type* ResugarContainerTypedef(const NamedDecl* decl, const Type* container_type) {
+  if (const clang::TypeDecl* type_decl = DynCastFrom(decl)) {
+    const Type* type = type_decl->getTypeForDecl();
+    VERRS(2) << "Trying to find typedef matching type " << PrintableType(type) << "\n";
+    if (const NamedDecl* container_decl = TypeToDeclAsWritten(container_type)) {
+      if (const DeclContext* context = DynCastFrom(container_decl)) {
+        typedef DeclContext::specific_decl_iterator<TypedefDecl> TypedefIterator;
+        TypedefIterator begin(context->decls_begin()), end(context->decls_end());
+        for (auto it : llvm::iterator_range<TypedefIterator>(begin, end)) {
+          if (it->getUnderlyingType().getTypePtr() == type) {
+            VERRS(2) << "Found matching typedef\n";
+            return it->getTypeForDecl();
+          } else {
+            VERRS(2) << "Typedef to " << PrintableType(it->getUnderlyingType().getTypePtr()) << " didn't match.\n";
+          }
+        }
+      } else {
+        VERRS(2) << "Container is not a DeclContext\n";
+      }
+    } else {
+      VERRS(2) << "Cannot find decl for type " << PrintableType(container_type) << "\n";
+    }
+  } else {
+    VERRS(2) << "`decl` is not TypeDecl\n";
+  }
+  return container_type;
+}
+
 }  // anonymous namespace
 
 // ----------------------------------------------------------------------
@@ -1344,7 +1372,8 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
 
     if (DeclIsTemplateWithNameAndNumArgsAndTypeArg(
             class_decl, "__gnu_cxx::__normal_iterator", 2, 1)) {
-      return GetTplTypeArg(class_decl, 1);
+      const Type* container_type = GetTplTypeArg(class_decl, 1);
+      return ResugarContainerTypedef(class_decl, container_type);
     }
     if (DeclIsTemplateWithNameAndNumArgsAndTypeArg(
             class_decl, "std::__wrap_iter", 1, 0)) {
