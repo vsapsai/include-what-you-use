@@ -247,29 +247,31 @@ bool CanIgnoreLocation(SourceLocation loc) {
 }
 
 const Type* ResugarContainerTypedef(const NamedDecl* decl, const Type* container_type) {
+  const int DEBUG_LEVEL = 9;
   if (const clang::TypeDecl* type_decl = DynCastFrom(decl)) {
-    const Type* type = type_decl->getTypeForDecl();
-    VERRS(2) << "Trying to find typedef matching type " << PrintableType(type) << "\n";
+    const Type* type = type_decl->getTypeForDecl()->getUnqualifiedDesugaredType();
+    VERRS(DEBUG_LEVEL) << "Trying to find typedef matching type " << PrintableType(type) << "\n";
     if (const NamedDecl* container_decl = TypeToDeclAsWritten(container_type)) {
       if (const DeclContext* context = DynCastFrom(container_decl)) {
         typedef DeclContext::specific_decl_iterator<TypedefDecl> TypedefIterator;
         TypedefIterator begin(context->decls_begin()), end(context->decls_end());
         for (auto it : llvm::iterator_range<TypedefIterator>(begin, end)) {
-          if (it->getUnderlyingType().getTypePtr() == type) {
-            VERRS(2) << "Found matching typedef\n";
+          const Type* underlying_type = it->getUnderlyingType().getTypePtr()->getUnqualifiedDesugaredType();
+          if (underlying_type == type) {
+            VERRS(DEBUG_LEVEL) << "Found matching typedef\n";
             return it->getTypeForDecl();
           } else {
-            VERRS(2) << "Typedef to " << PrintableType(it->getUnderlyingType().getTypePtr()) << " didn't match.\n";
+            VERRS(DEBUG_LEVEL) << "Typedef to " << PrintableType(underlying_type) << " didn't match.\n";
           }
         }
       } else {
-        VERRS(2) << "Container is not a DeclContext\n";
+        VERRS(DEBUG_LEVEL) << "Container is not a DeclContext\n";
       }
     } else {
-      VERRS(2) << "Cannot find decl for type " << PrintableType(container_type) << "\n";
+      VERRS(DEBUG_LEVEL) << "Cannot find decl for type " << PrintableType(container_type) << "\n";
     }
   } else {
-    VERRS(2) << "`decl` is not TypeDecl\n";
+    VERRS(DEBUG_LEVEL) << "`decl` is not TypeDecl\n";
   }
   return container_type;
 }
