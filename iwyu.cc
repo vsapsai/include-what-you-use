@@ -1347,6 +1347,7 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
         class_decl = TypeToDeclAsWritten(firstarg_type);
       }
     }
+    const NamedDecl* original_class_decl = class_decl;
 
     // In addition to __normal_iterator<x> and __wrap_iter<x>, we want
     // to handle reverse_iterator<__normal_iterator<x>>, and in the same way.
@@ -1375,7 +1376,7 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
     if (DeclIsTemplateWithNameAndNumArgsAndTypeArg(
             class_decl, "__gnu_cxx::__normal_iterator", 2, 1)) {
       const Type* container_type = GetTplTypeArg(class_decl, 1);
-      return ResugarContainerTypedef(class_decl, container_type);
+      return ResugarContainerTypedef(original_class_decl, container_type);
     }
     if (DeclIsTemplateWithNameAndNumArgsAndTypeArg(
             class_decl, "std::__wrap_iter", 1, 0)) {
