@@ -51,6 +51,7 @@ void foo() {
   // IWYU: std::vector<.*>::reverse_iterator is...*<vector>
   for (std::vector<float>::reverse_iterator
            // IWYU: std::vector is...*<vector>
+           // IWYU: std::vector<.*>::reverse_iterator is...*<vector>
            float_reverse_it = float_vector.rbegin();
        // IWYU: std::vector is...*<vector>
        // IWYU: std::vector<.*>::reverse_iterator is...*<vector>

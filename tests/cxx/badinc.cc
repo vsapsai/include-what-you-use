@@ -1534,6 +1534,7 @@ int main() {
        it != local_enum_vector.end(); ++it) {
     // IWYU: I2_Enum is...*badinc-i2.h
     // IWYU: std::vector is...*<vector>
+    // IWYU: std::vector<.*>::iterator is...*<vector>
     std::find(local_enum_vector.begin(), local_enum_vector.end(), *it);
   }
   // string also uses __normal_iterator.  Let's also verify that
@@ -1882,7 +1883,7 @@ The full include-list for tests/cxx/badinc.cc:
 #include <fstream>  // for fstream
 #include <list>  // for list
 #include <new>  // for operator new
-#include <string>  // for allocator, basic_string, basic_string<>::iterator, operator+, string
+#include <string>  // for allocator, basic_string<>::iterator, operator+, string
 #include <typeinfo>  // for type_info
 #include "tests/cxx/badinc-d1.h"  // for D1CopyClassFn, D1Function, D1_Class, D1_CopyClass, D1_Enum, D1_Enum::D11, D1_I1_Typedef, D1_StructPtr, D1_Subclass, D1_TemplateClass, D1_TemplateStructWithDefaultParam, MACRO_CALLING_I4_FUNCTION
 #include "tests/cxx/badinc-d4.h"  // for D4_ClassForOperator, operator<<
