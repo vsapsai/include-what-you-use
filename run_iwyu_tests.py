@@ -96,6 +96,7 @@ class OneIwyuTest(unittest.TestCase):
       'clmode.cc': ['--driver-mode=cl', '/GF', '/Os', '/W2'],
       'conversion_ctor.cc': ['-std=c++11'],
       'deleted_implicit.cc' : ['-std=c++11'],
+      'funcptrs.cc': ['-Wno-unused'],
       'lambda_fwd_decl.cc': ['-std=c++11'],
       'lateparsed_template.cc': ['-fdelayed-template-parsing'],
       'macro_defined_by_includer.cc': [
@@ -106,6 +107,7 @@ class OneIwyuTest(unittest.TestCase):
       'prefix_header_includes_add.cc': prefix_headers,
       'prefix_header_includes_keep.cc': prefix_headers,
       'prefix_header_includes_remove.cc': prefix_headers,
+      'typedef_in_template.cc': ['-std=c++11'],
     }
     include_map = {
       'alias_template.cc': ['.'],
@@ -115,6 +117,7 @@ class OneIwyuTest(unittest.TestCase):
       'backwards_includes.cc': ['.'],
       'badinc.cc': ['.'],
       'badinc-extradef.cc': ['.'],
+      'funcptrs.cc': ['.'],
       'casts.cc': ['.'],
       'catch.cc': ['.'],
       'check_also.cc': ['.'],
@@ -173,6 +176,7 @@ class OneIwyuTest(unittest.TestCase):
       'template_specialization.cc': ['.'],
       'typedef_chain_in_template.cc': ['.'],
       'typedef_chain_no_follow.cc': ['.'],
+      'typedef_in_template.cc': ['.'],
       'typedefs_and_resugaring.cc': ['.'],
       'unused_class_template_ctor.cc': ['.'],
       'uses_printf.cc': ['.'],

@@ -619,11 +619,6 @@ H_TemplateStruct<I1_TemplateClass<int> > h_template_struct_tplclass_arg;
 // via a default template argument.
 // IWYU: I2_TemplateClass::~I2_TemplateClass<.*> is...*badinc-i2-inl.h
 H_TemplateTemplateClass<> h_templatetemplateclass;
-// These do not need the full type for I1_Class because they're tpl params.
-// IWYU: I1_Class needs a declaration
-H_TypedefStruct<I1_Class>::t_type h_typdef_struct_t;
-// IWYU: I1_Class needs a declaration
-H_TypedefStruct<I1_Class>::pair_type h_typdef_struct_pair;
 // IWYU: I2_Class is...*badinc-i2.h
 // IWYU: I2_Class needs a declaration
 // IWYU: I2_TemplateFn is...*badinc-i2.h
@@ -1417,13 +1412,10 @@ int main() {
   local_i2_template_class.InlFileTemplateClassFn();
   // IWYU: I2_TemplateClass is...*badinc-i2.h
   local_i2_template_class.a();
-  // TODO(csilvers): these first three errors are wrong, due to a bug
-  // in IntendsToProvide.  The file defining this template method
-  // *should* be providing badinc-i2-inl.h, but isn't (iwyu will
-  // suggest we add it).  So we don't detect that that file is
-  // responsible for these symbols, and not us.
-  // IWYU: I2_TemplateClass::I2_TemplateClass<.*> is...*badinc-i2-inl.h
-  // IWYU: I2_TemplateClass::~I2_TemplateClass<.*> is...*badinc-i2-inl.h
+  // TODO(csilvers): this first error is wrong, due to a bug in
+  // IntendsToProvide.  The file defining this template method *should* be
+  // providing badinc-i2-inl.h, but isn't (iwyu will suggest we add it).
+  // So we don't detect that file as responsible for these symbols, and not us.
   // IWYU: I2_TemplateClass::InlFileTemplateClassFn is...*badinc-i2-inl.h
   // IWYU: I2_TemplateClass is...*badinc-i2.h
   local_i2_template_class.CcFileFn();
@@ -1889,42 +1881,6 @@ int main() {
   // IWYU: I12 is...*badinc-i1.h
   local_d1_copy_class = D1CopyClassFn(I12);
   local_d1_copy_class.a();
-
-  // Test (templated) function pointers and method pointers.
-  // IWYU: I1_Class needs a declaration
-  // IWYU: I1_Enum is...*badinc-i1.h
-  // IWYU: I1_Function is...*badinc-i1.h
-  I1_Enum (*local_fn_ptr)(I1_Class*) = &I1_Function;
-  // IWYU: I1_Class is...*badinc-i1.h
-  int (*static_method_ptr)() = &I1_Class::s;
-  // IWYU: I1_Struct is...*badinc-i1.h
-  // IWYU: I1_Struct needs a declaration
-  // IWYU: I1_TemplateMethodOnlyClass is...*badinc-i1.h
-  int (*tpl_fn_ptr)() = &I1_TemplateMethodOnlyClass<I1_Struct>::stat;
-  // IWYU: I1_Class is...*badinc-i1.h
-  // IWYU: I1_Class needs a declaration
-  // IWYU: I1_Struct needs a declaration
-  // IWYU: I1_TemplateMethodOnlyClass is...*badinc-i1.h
-  int (*tpl_fn_ptr2)() = &I1_TemplateMethodOnlyClass<I1_Struct>::t<I1_Class>;
-  // IWYU: I1_Class is...*badinc-i1.h
-  int (I1_Class::*method_ptr)() const = &I1_Class::a;
-  // IWYU: I1_Struct is...*badinc-i1.h
-  // IWYU: I1_Struct needs a declaration
-  // IWYU: I1_TemplateMethodOnlyClass is...*badinc-i1.h
-  I1_Struct (I1_TemplateMethodOnlyClass<I1_Struct>::*tpl_method_ptr)()
-      // IWYU: I1_Struct is...*badinc-i1.h
-      // IWYU: I1_Struct needs a declaration
-      // IWYU: I1_TemplateMethodOnlyClass is...*badinc-i1.h
-      = &I1_TemplateMethodOnlyClass<I1_Struct>::a;
-  // IWYU: I1_Struct needs a declaration
-  // IWYU: I1_TemplateMethodOnlyClass is...*badinc-i1.h
-  // IWYU: I2_Struct is...*badinc-i2.h
-  I2_Struct (I1_TemplateMethodOnlyClass<I1_Struct>::*tpl_method_ptr2)()
-      // IWYU: I1_Struct needs a declaration
-      // IWYU: I2_Struct is...*badinc-i2.h
-      // IWYU: I2_Struct needs a declaration
-      // IWYU: I1_TemplateMethodOnlyClass is...*badinc-i1.h
-      = &I1_TemplateMethodOnlyClass<I1_Struct>::c<I2_Struct>;
 
   // Check use of a macro inside an #ifdef.
   // IWYU: I2_MACRO is...*badinc-i2.h
