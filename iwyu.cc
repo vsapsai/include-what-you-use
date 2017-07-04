@@ -105,6 +105,7 @@
 #include "iwyu_ast_util.h"
 #include "iwyu_cache.h"
 #include "iwyu_globals.h"
+#include "iwyu_lexer_utils.h"
 #include "iwyu_location_util.h"
 #include "iwyu_output.h"
 #include "iwyu_path_util.h"
@@ -2583,7 +2584,26 @@ class IwyuBaseAstVisitor : public BaseAstVisitor<Derived> {
     // If we're in an nns (e.g. the Foo in Foo::bar), we're never
     // forward-declarable, even if we're part of a pointer type, or in
     // a template argument, or whatever.
-    current_ast_node()->set_in_forward_declare_context(false);
+    ASTNode* ast_node = current_ast_node();
+    ast_node->set_in_forward_declare_context(false);
+
+    // For method calls it doesn't matter if a method is defined inside
+    // a class or outside of it.  We detect out-of-class method calls with
+    // the pattern
+    //
+    //   CallExpr
+    //   `-CXXMethodDecl
+    //     `-NestedNameSpecifier
+    //
+    // and skip traversing method qualifier as in-class methods don't have it.
+    if (const CXXMethodDecl* parent = ast_node->GetParentAs<CXXMethodDecl>()) {
+      if ((nns == parent->getQualifier()) &&
+          ast_node->AncestorIsA<CallExpr>(2)) {
+        VERRS(7) << "Skipping traversal of CXXMethodDecl qualifier "
+                 << PrintableNestedNameSpecifier(nns) << "\n";
+        return false;
+      }
+    }
     return true;
   }
 
@@ -3692,6 +3712,12 @@ class IwyuAstConsumer
             if (decl == first_decl)
               definitely_keep_fwd_decl = true;
           }
+        }
+      } else {
+        SourceLocation decl_end_location = decl->getSourceRange().getEnd();
+        if (LineHasText(decl_end_location, "// IWYU pragma: keep") ||
+            LineHasText(decl_end_location, "/* IWYU pragma: keep")) {
+          definitely_keep_fwd_decl = true;
         }
       }
 
